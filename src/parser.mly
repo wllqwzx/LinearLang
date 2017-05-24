@@ -4,22 +4,38 @@
 %token EQUAL
 %token COMMA
 %token SEMICOLEN
+%token COLEN
+%token DOUBLEQUOTE
 
-%token LET
+%token LETUN
+%token LETLIN
 %token IN
 %token IF
+%token IFNULL
 %token THEN
 %token ELSE
-%token IS_ZERO
-%token PROC
+%token FUN
 %token BEGIN
 %token END
-%token NEWREF
-%token DEREF
-%token SETREF
+
+%token LINCONS
+%token SPLIT
+%token AS
+%token COPYATOM
+%token COPYLIST
+%token FREEATOM
+%token FREELIST
+%token PRINT
+
+
+%token NUMBER
+%token BOOL
+%token LINLIST
+%token LINRES
 
 %token <int>NUM
 %token <string>ID
+%token <string>STR
 
 %token EOF
 

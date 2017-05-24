@@ -32,6 +32,8 @@
 let int_rexp = '-'? ['0'-'9'] ['0'-'9']*
 let id_rexp = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
+let str_rexp = '"' ['a'-'z' 'A'-'Z' '0'-'9' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']* '"'
+
 let blank = [' ' '\t']+
 let newline = '\n' | '\r' | "\r\n"
 
@@ -40,24 +42,33 @@ rule read =
     | blank         { read lexbuf }
     | newline       { next_line lexbuf; read lexbuf }
     | int_rexp      { NUM (int_of_string (Lexing.lexeme lexbuf)) }
+    | str_rexp      { STR (Lexing.lexeme lexbuf) }
     | '('           { L_PAREN }
     | ')'           { R_PAREN }
     | '-'           { MINUS }
     | '='           { EQUAL }
     | ','           { COMMA }
     | ';'           { SEMICOLEN }
-    | "let"         { LET }
+    | ':'           { COLEN }
+    | '"'           { DOUBLEQUOTE }
+    | "letUn"       { LETUN }
+    | "letLin"      { LETLIN }
     | "in"          { IN }
     | "if"          { IF }
+    | "if-null"     { IFNULL }
     | "then"        { THEN }
     | "else"        { ELSE }
     | "begin"       { BEGIN }
     | "end"         { END }
-    | "setref"      { SETREF }
-    | "deref"       { DEREF }
-    | "newref"      { NEWREF }
-    | "proc"        { PROC }
-    | "zero?"       { IS_ZERO }
+    | "fun"        { FUN }
+    | "split"
+    | "as"
+    | "copyAtom"
+    | "copyList"
+    | "freeAtom"
+    | "freeList"
+    | "print"
+    | 
     | id_rexp       { ID (Lexing.lexeme lexbuf) }    
     | _             { raise (LexerError ("Oops!!! Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
                                           ^ " at " ^ (error_info lexbuf))) }
