@@ -3,22 +3,23 @@ letUn copyList(x:LinList) =
     then null
     else split x as carx cdrx
          copy carx as xx1 xx2
-         letLin yy = copyAll(cdrx)
+         letLin yy = copyList(cdrx)
          split yy as yy1 yy2
-         letLin rt1 = liCons(xx1,yy1)
-         letLin rt2 = liCons(xx2,yy2)
-         liCons(rt1,rt2)
+         letLin rt1 = linCons(xx1,yy1)
+         letLin rt2 = linCons(xx2,yy2)
+         linCons(rt1,rt2)
 
 
-letUn freeList(x:LinList) = 
+
+letUn freeList = fun(x:LinList){
     if-null x
-    then free(x)
+    then freeList(x)
     else split x as x1 x2
          begin 
-            free(x);
+            freeAtom(x);
             freeList(x2)
          end
-
+}
 
 letUn x = 10
 letUn y = 20
@@ -28,7 +29,7 @@ letLin res2 = newRes("bbb")
 
 letLin res2 = liCons(res1, res2)
 
-split copyAll(res2) as a1 a2li
+split copyList(res2) as a1 a2li
 split a2li as a2 anil
 
 begin

@@ -45,12 +45,22 @@ rule read =
     | str_rexp      { STR (Lexing.lexeme lexbuf) }
     | '('           { L_PAREN }
     | ')'           { R_PAREN }
-    | '-'           { MINUS }
+    | '{'           { L_CURLY }
+    | '}'           { R_CURLY }
     | '='           { EQUAL }
     | ','           { COMMA }
     | ';'           { SEMICOLEN }
     | ':'           { COLEN }
     | '"'           { DOUBLEQUOTE }
+    | "true"        { BOOLVAL true }
+    | "false"       { BOOLVAL false }
+    | "and"         { AND }
+    | "or"          { OR }
+    | "not"         { NOT }
+    | "add"         { ADD }
+    | "sub"         { SUB }
+    | "le?"         { LE }
+    | "eq?"         { EQ }
     | "letUn"       { LETUN }
     | "letLin"      { LETLIN }
     | "in"          { IN }
@@ -60,16 +70,24 @@ rule read =
     | "else"        { ELSE }
     | "begin"       { BEGIN }
     | "end"         { END }
-    | "fun"        { FUN }
-    | "split"
-    | "as"
-    | "copyAtom"
-    | "copyList"
-    | "freeAtom"
-    | "freeList"
-    | "print"
-    | 
+    | "fun"         { FUN }
+    | "newRes"      { NEWRES }
+    | "linCons"     { LINCONS }
+    | "null"        { NULL }
+    | "split"       { SPLIT }
+    | "as"          { AS }
+    | "copyAtom"    { COPYATOM }
+    | "copyList"    { COPYLIST }
+    | "freeAtom"    { FREEATOM }
+    | "freeList"    { FREELIST }
+    | "print"       { PRINT }
+    | "Number"      { NUMBER }
+    | "Bool"        { BOOL }
+    | "LinList"     { LINLIST }
+    | "LinRes"      { LINRES }
+    | "Unit"        { UNIT }
+    | "Arrow"       { ARROW }
     | id_rexp       { ID (Lexing.lexeme lexbuf) }    
-    | _             { raise (LexerError ("Oops!!! Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
+    | _             { raise (LexerError ("!!!Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
                                           ^ " at " ^ (error_info lexbuf))) }
     | eof           { EOF }

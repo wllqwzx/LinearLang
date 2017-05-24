@@ -15,23 +15,26 @@ type term =
     | Bool_term      of bool
     | And_term       of term * term
     | Or_term        of term * term
-    | Not_term       of term * term
+    | Not_term       of term
 
     | Var_term       of string
     | LetUn_term     of string * term * term
     | LetLin_term    of string * term * term
     | If_term        of term * term * term
+    | If_null_term   of string * term * term
     | Lambda_term    of string * ty * term
-    | App_trem       of term * term
+    | App_term       of string * term
     | Begin_term     of term list
 
     | NewLinRes_term        of string
-    | CopyLinRes_term       of string * string * term
-    | FreeLinRes_term       of term
-    | PrintLinRes_term      of term
+    | CopyAtom_term         of term * string * string
+    | CopyList_term         of term * string * string
+    | FreeAtom_term         of term
+    | FreeList_term         of term
+    | Print_term            of term
     | LinCons_term      of term * term
-    | Split_term        of string * string * term
-    | LinListNull_term
+    | Split_term        of term * string * string
+    | Null_term
 
 
 type program =
