@@ -20,6 +20,7 @@ type term =
     | Var_term       of string
     | LetUn_term     of string * term * term
     | LetLin_term    of string * term * term
+    | Letrec_term    of string * ty * term * term
     | If_term        of term * term * term
     | If_null_term   of string * term * term
     | Lambda_term    of string * ty * term

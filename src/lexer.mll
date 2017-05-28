@@ -63,6 +63,7 @@ rule read =
     | "eq?"         { EQ }
     | "letUn"       { LETUN }
     | "letLin"      { LETLIN }
+    | "letrec"      { LETREC }
     | "in"          { IN }
     | "if"          { IF }
     | "if-null"     { IFNULL }
