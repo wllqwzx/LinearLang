@@ -1,21 +1,31 @@
-letUn copyList(x:LinList) = 
+
+letrec fact:Arrow(Number,Number) = fun (x:Number){
+    if eq?(x,1) 
+    then 1
+    else add(x,fact(sub(x,1)))
+}
+
+letUn copyListxxx = fun(x:LinList){
     if-null x
     then null
-    else split x as carx cdrx
-         copy carx as xx1 xx2
-         letLin yy = copyList(cdrx)
-         split yy as yy1 yy2
-         letLin rt1 = linCons(xx1,yy1)
-         letLin rt2 = linCons(xx2,yy2)
-         linCons(rt1,rt2)
+    else 
+        begin
+            split x as carx cdrx;
+            copyAtom carx as xx1 xx2;
+            copyList cdrx as yy1 yy2;
+            letLin rt1 = linCons(xx1,yy1)
+            letLin rt2 = linCons(xx2,yy2)
+            linCons(rt1,rt2)
+        end
+}
 
 
-
-letUn freeList = fun(x:LinList){
+letUn freeLislxxx = fun(x:LinList){
     if-null x
     then freeList(x)
-    else split x as x1 x2
+    else 
          begin 
+            split x as x1 x2;
             freeAtom(x);
             freeList(x2)
          end
@@ -27,17 +37,18 @@ letUn y = 20
 letLin res1 = newRes("aaa")
 letLin res2 = newRes("bbb")
 
-letLin res2 = liCons(res1, res2)
-
-split copyList(res2) as a1 a2li
-split a2li as a2 anil
+letLin res2 = linCons(res1, res2)
 
 begin
-    letLin t1 = printList(a1);
-    letLin t2 = printList(a2);
-    freeList(t1);
-    freeList(t2);
-    freeList(anil)
+    copyList res2 as a1 a2li;
+    split a2li as a2 anil;
+    letLin t1 = print(a1)
+    letLin t2 = print(a2)
+    begin
+        freeList(t1);
+        freeList(t2);
+        freeList(anil)
+    end
 end
 
 
