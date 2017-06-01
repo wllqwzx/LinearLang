@@ -50,6 +50,7 @@ let rec print_term =
     | Num_term  num -> print_int num
     | Add_term  (tm1,tm2) -> print_term tm1; print_string "+"; print_term tm2 
     | Sub_term  (tm1,tm2) -> print_term tm1; print_string "-"; print_term tm2 
+    | Mul_term  (tm1,tm2) -> print_term tm1; print_string "*"; print_term tm2 
     | Le_term   (tm1,tm2) -> print_term tm1; print_string "<"; print_term tm2 
     | Eq_term   (tm1,tm2) -> print_term tm1; print_string "=="; print_term tm2 
     | Bool_term b -> if b then print_string "true" else print_string "false"
@@ -68,13 +69,13 @@ let rec print_term =
     | Begin_term    tmli -> print_string "begin\n"; print_tmli tmli; print_string "end\n"
 
     | NewLinRes_term    str -> print_string ("newRes(" ^ str ^ ")")
-    | CopyAtom_term     (tm,str1,str2) -> print_string "copyAtom "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ ";\n")
-    | CopyList_term     (tm,str1,str2) -> print_string "copyList "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ ";\n")
+    | CopyAtom_term     (tm,str1,str2,ast3) -> print_string "copyAtom "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ "\n"); print_term ast3
+    | CopyList_term     (tm,str1,str2,ast3) -> print_string "copyList "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ "\n"); print_term ast3
     | FreeAtom_term      tm -> print_string "freeAtom("; print_term tm; print_string ")\n"
     | FreeList_term      tm -> print_string "freeList("; print_term tm; print_string ")\n"
     | Print_term         tm -> print_string "print("; print_term tm; print_string ")\n"
     | LinCons_term      (tm1,tm2) -> print_string "LinCons("; print_term tm1; print_string ", "; print_term tm2; print_string ")\n"
-    | Split_term        (tm,str1,str2) -> print_string "split "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ ";\n")
+    | Split_term        (tm,str1,str2,ast3) -> print_string "split "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ "\n"); print_term ast3
     | Null_term          -> print_string "null")
 
 and print_tmli =

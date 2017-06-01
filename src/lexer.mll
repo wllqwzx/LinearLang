@@ -59,6 +59,7 @@ rule read =
     | "not"         { NOT }
     | "add"         { ADD }
     | "sub"         { SUB }
+    | "mul"         { MUL }
     | "le?"         { LE }
     | "eq?"         { EQ }
     | "letUn"       { LETUN }

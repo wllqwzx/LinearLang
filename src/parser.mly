@@ -36,6 +36,7 @@
 %token NOT
 %token ADD
 %token SUB
+%token MUL
 %token LE
 %token EQ
 
@@ -69,6 +70,8 @@ nt_term:
                                     { Ast.Add_term (ast1,ast2) }
     | SUB; L_PAREN; ast1=nt_term; COMMA; ast2=nt_term; R_PAREN
                                     { Ast.Sub_term (ast1,ast2) }
+    | MUL; L_PAREN; ast1=nt_term; COMMA; ast2=nt_term; R_PAREN
+                                    { Ast.Mul_term (ast1,ast2) }                                    
     | LE; L_PAREN; ast1=nt_term; COMMA; ast2=nt_term; R_PAREN
                                     { Ast.Le_term (ast1,ast2) }
     | EQ; L_PAREN; ast1=nt_term; COMMA; ast2=nt_term; R_PAREN
@@ -101,10 +104,10 @@ nt_term:
 
     | NEWRES; L_PAREN; ast=STR; R_PAREN
                                     { Ast.NewLinRes_term ast } 
-    | COPYATOM; ast = nt_term; AS; ast1 = ID; ast2 = ID
-                                    { Ast.CopyAtom_term (ast,ast1,ast2) }
-    | COPYLIST; ast = nt_term; AS; ast1 = ID; ast2 = ID
-                                    { Ast.CopyList_term (ast,ast1,ast2) }
+    | COPYATOM; ast = nt_term; AS; ast1 = ID; ast2 = ID; ast3 = nt_term
+                                    { Ast.CopyAtom_term (ast,ast1,ast2,ast3) }
+    | COPYLIST; ast = nt_term; AS; ast1 = ID; ast2 = ID; ast3 = nt_term
+                                    { Ast.CopyList_term (ast,ast1,ast2,ast3) }
     | FREEATOM; L_PAREN; ast=nt_term; R_PAREN
                                     { Ast.FreeAtom_term ast }
     | FREELIST; L_PAREN; ast=nt_term; R_PAREN
@@ -113,8 +116,8 @@ nt_term:
                                     { Ast.Print_term ast }
     | LINCONS; L_PAREN; ast1 = nt_term; COMMA; ast2 = nt_term; R_PAREN
                                     { Ast.LinCons_term (ast1,ast2) }
-    | SPLIT; ast = nt_term; AS; ast1 = ID; ast2 = ID 
-                                    { Ast.Split_term (ast,ast1,ast2) }
+    | SPLIT; ast = nt_term; AS; ast1 = ID; ast2 = ID; ast3 = nt_term
+                                    { Ast.Split_term (ast,ast1,ast2,ast3) }
     | NULL                          { Ast.Null_term }
 
 
