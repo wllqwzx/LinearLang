@@ -20,7 +20,8 @@ let isLinear =
     | _ -> false
 
 
-let rec delete_var =
+(* delete out of scope *)
+let rec delete_var = 
     fun env str ->
     match env with
     | Empty_tenv -> Empty_tenv
@@ -31,10 +32,30 @@ let rec delete_var =
                                      else Extend_tenv (str0,typ,(delete_var env0 str))
 
 
+let rec lookup_type =
+    fun env str ->
+    match env with
+    | Empty_tenv -> raise (TypeError ("Variable: " ^ str ^" clould not be find. It may be used or not defined!"))
+    | Extend_tenv (str0,typ,env0) -> if (String.equal str str0)
+                                     then typ
+                                     else lookup_type env0 str
+
+let rec use_var =
+    fun env str ->
+    match env with
+    | Empty_tenv -> Empty_tenv
+    | Extend_tenv (str0,typ,env0) -> if (String.equal str str0)
+                                     then (match typ with
+                                           | LinResTy -> env0
+                                           | LinListTy -> env0
+                                           | _ -> Extend_tenv (str0,typ,env0))
+                                     else Extend_tenv (str0,typ,(use_var env0 str))
+
+
 
 let rec type_of =
     fun (tm:term) : ty ->
-    match tm with
+   (match tm with
     | Num_term       n -> NumTy
     | Add_term       (tm1,tm2) -> let ty1 = type_of tm1 in
                                   let ty2 = type_of tm2 in
@@ -77,27 +98,30 @@ let rec type_of =
                             then BoolTy
                             else raise (TypeError "type error in Or!")
 (*--------------------*)
-    | Var_term       of string
-    | If_term        of term * term * term
-    | If_null_term   of string * term * term
-    | Lambda_term    of string * ty * term
-    | App_term       of string * term
-    | Begin_term     of term list
-    | LetUn_term     of string * term * term
-    | LetLin_term    of string * term * term
-    | Letrec_term    of string * ty * term * term
+    | Var_term       str -> let typ = lookup_type !tenv str in
+                            begin 
+                                tenv := use_var !tenv str;
+                                typ
+                            end
+    | If_term        (tm1,tm2,tm3) -> 
+    | If_null_term   (str1,tm1,tm2) -> 
+    | Lambda_term    (str,typ,tm) -> 
+    | App_term       (str,tm) -> 
+    | Begin_term     tmli -> 
+    | LetUn_term     (str,tm1,tm2) -> 
+    | LetLin_term    (str,tm1,tm2) -> 
+    | Letrec_term    (str,typ,tm1,tm2) -> 
     
 (*--------------------*)
-    | NewLinRes_term    of string
-    | CopyAtom_term     of term * string * string * term
-    | CopyList_term     of term * string * string * term
-    | Split_term        of term * string * string * term
-    | FreeAtom_term     of term
-    | FreeList_term     of term
-    | Print_term        of term
-    | LinCons_term      of term * term
-    | Null_term
-
+    | NewLinRes_term    str -> 
+    | CopyAtom_term     (tm1,str1,str2,tm2) -> 
+    | CopyList_term     (tm1,str1,str2,tm2) -> 
+    | Split_term        (tm1,str1,str2,tm2) -> 
+    | FreeAtom_term     tm -> 
+    | FreeList_term     tm -> 
+    | Print_term        tm -> 
+    | LinCons_term      (tm1,tm2) -> 
+    | Null_term         -> LinListTy)
 
 
 let check =
