@@ -113,14 +113,24 @@ let rec type_of =
     | Letrec_term    (str,typ,tm1,tm2) -> 
     
 (*--------------------*)
-    | NewLinRes_term    str -> 
+    | NewLinRes_term    str -> LinResTy
     | CopyAtom_term     (tm1,str1,str2,tm2) -> 
     | CopyList_term     (tm1,str1,str2,tm2) -> 
     | Split_term        (tm1,str1,str2,tm2) -> 
-    | FreeAtom_term     tm -> 
-    | FreeList_term     tm -> 
-    | Print_term        tm -> 
-    | LinCons_term      (tm1,tm2) -> 
+    | FreeAtom_term     tm -> let typ = type_of tm in
+                              if typ = LinResTy 
+                              then UnitTy
+                              else raise (TypeError ("type of freeAtom is LinResTy -> UnitTy"))
+    | FreeList_term     tm -> let typ = type_of tm in
+                              if typ = LinListTy 
+                              then UnitTy
+                              else raise (TypeError ("type of freeList is LinListTy -> UnitTy"))
+    | Print_term        tm -> type_of tm
+    | LinCons_term      (tm1,tm2) -> let typ1 = type_of tm1 in
+                                     let typ2 = type_of tm2 in
+                                     if typ1 = LinResTy && typ2 = LinListTy
+                                     then LinListTy
+                                     else raise (TypeError ("type of LinCons is LinResTy * LinListTy -> LinListTy!"))
     | Null_term         -> LinListTy)
 
 
