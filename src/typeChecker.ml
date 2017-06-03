@@ -52,6 +52,21 @@ let rec use_var =
                                      else Extend_tenv (str0,typ,(use_var env0 str))
 
 
+let envCopy = 
+    fun envref ->
+    ref (!envref)
+
+
+let rec envSame =
+    fun env1 env2 ->
+    match env1, env2 with
+    | Empty_tenv, Empty_tenv -> true
+    | Extend_tenv (str1,typ1,ev1), Extend_tenv (str2,typ2,ev2) ->
+                if (String.equal str1 str2)
+                then (typ1 = typ2) && (envSame ev1 ev2)
+                else false
+    | _ -> false
+
 
 let rec type_of =
     fun (tm:term) : ty ->
@@ -103,9 +118,34 @@ let rec type_of =
                                 tenv := use_var !tenv str;
                                 typ
                             end
-    | If_term        (tm1,tm2,tm3) -> 
+    | If_term        (tm1,tm2,tm3) -> let typ = type_of tm1 in
+                                      if typ = BoolTy
+                                      then let tenvCopy = envCopy tenv in
+                                           let typ1 = type_of tm1 in
+                                           let temp = envCopy tenv in
+                                           begin
+                                                tenv := !tenvCopy;
+                                                let typ2 = type_of tm2 in
+                                                if typ1 = typ2 
+                                                then if envSame !temp !tenv
+                                                     then typ1
+                                                     else raise (TypeError ("type context is different after two branches!"))
+                                                else raise (TypeError ("type is not equal in if branches!"))
+                                           end
+                                      else raise (TypeError ("term in if condition should be BoolTy!"))
     | If_null_term   (str1,tm1,tm2) -> 
-    | Lambda_term    (str,typ,tm) -> 
+    | Lambda_term    (str,typ,tm) -> let envSave = (envCopy tenv) in
+                                     let env = !tenv in
+                                     begin
+                                        tenv := (Extend_tenv (str,typ,env));
+                                        let typ2 = type_of tm in
+                                        begin
+                                            tenv := delete_var !tenv str;
+                                            if (envSame !tenv !envSave)
+                                            then typ2
+                                            else raise (TypeError ("Can not use LinRes defined outside the function!")) 
+                                        end
+                                     end
     | App_term       (str,tm) -> 
     | Begin_term     tmli -> 
     | LetUn_term     (str,tm1,tm2) -> 
