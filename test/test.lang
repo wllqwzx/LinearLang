@@ -1,8 +1,10 @@
 
-letrec fact:Arrow(Number,Number) = fun (x:Number){
-    if eq?(x,1) 
-    then 1
-    else add(x,fact(sub(x,1)))
+letUn fact = fix fun (f:Arrow(Number,Number)){
+    fun (x:Number){
+        if eq?(x,1) 
+        then 1
+        else add(x,f(sub(x,1)))
+    }
 }
 
 letUn copyListxxx = fun(x:LinList){

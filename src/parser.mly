@@ -10,7 +10,8 @@
 
 %token LETUN
 %token LETLIN
-%token LETREC
+/*%token LETREC*/
+%token FIX
 %token IN
 %token IF
 %token IFNULL
@@ -89,8 +90,9 @@ nt_term:
                                     { Ast.LetUn_term (ast1,ast2,ast3) }
     | LETLIN; ast1 = ID; EQUAL; ast2 = nt_term; ast3 = nt_term
                                     { Ast.LetLin_term (ast1,ast2,ast3) }
-    | LETREC; ast1 = ID; COLEN; typ = nt_ty ; EQUAL; ast2 = nt_term; ast3 = nt_term
-                                    { Ast.Letrec_term (ast1,typ,ast2,ast3) }
+    /*| LETREC; ast1 = ID; COLEN; typ = nt_ty ; EQUAL; ast2 = nt_term; ast3 = nt_term
+                                    { Ast.Letrec_term (ast1,typ,ast2,ast3) }*/
+    | FIX; ast = nt_term            { Ast.Fix_term ast }
     | IF; ast1 = nt_term; THEN; ast2 = nt_term; ELSE; ast3 = nt_term
                                     { Ast.If_term (ast1,ast2,ast3) }
     | IFNULL; ast1 = ID; THEN; ast2 = nt_term; ELSE; ast3 = nt_term

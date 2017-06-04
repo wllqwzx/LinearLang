@@ -8,10 +8,10 @@ open Ast
 let rec print_ty =
     fun (typ:Ast.ty) ->
     match typ with
-    | NumTy         -> print_string "Num"
-    | BoolTy        -> print_string "Bool"
-    | LinResTy      -> print_string "LinRes"
-    | LinListTy     -> print_string "LinList"
+    | NumTy         -> print_string "NumTy"
+    | BoolTy        -> print_string "BoolTy"
+    | LinResTy      -> print_string "LinResTy"
+    | LinListTy     -> print_string "LinListTy"
     | UnitTy        -> print_string "Unit"
     | ArrowTy (ty1,ty2) -> print_ty ty1; print_string "->"; print_ty ty2
 
@@ -33,7 +33,8 @@ let rec print_term =
     | Var_term      str -> print_string str
     | LetUn_term    (str,tm1,tm2) -> print_string ("LetUn " ^ str ^ " = "); print_term tm1; print_string ";\n"; print_term tm2
     | LetLin_term   (str,tm1,tm2) -> print_string ("LetLin " ^ str ^ " = "); print_term tm1; print_string ";\n"; print_term tm2
-    | Letrec_term   (str,typ,tm1,tm2) -> print_string ("Letrec " ^ str ^ " : "); print_ty typ; print_string " = "; print_term tm1; print_string ";\n"; print_term tm2
+    (*| Letrec_term   (str,typ,tm1,tm2) -> print_string ("Letrec " ^ str ^ " : "); print_ty typ; print_string " = "; print_term tm1; print_string ";\n"; print_term tm2*)
+    | Fix_term      tm -> print_string ("fix "); print_term tm
     | If_term       (tm1,tm2,tm3) -> print_string "if "; print_term tm1; print_string "\nthen "; print_term tm2; print_string "\nelse "; print_term tm3; print_newline ()
     | If_null_term  (str,tm1,tm2) -> print_string ("if-null " ^ str ^ "\nthen "); print_term tm1; print_string "\nelse "; print_term tm2; print_newline ()
     | Lambda_term   (str,typ,tm) -> print_string ("fun " ^ str ^ " : "); print_ty typ; print_string " {\n"; print_term tm; print_string "}\n"

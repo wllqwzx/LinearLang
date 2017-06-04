@@ -1,0 +1,36 @@
+letLin x = newRes("aaa")
+letLin y = newRes("bbb")
+letUn ff = fun (xx:LinRes){
+    xx
+}
+
+begin
+    if eq?(2,3)
+    then 
+        begin freeAtom(x); freeAtom(y) end
+    else 
+        begin freeAtom(y); freeAtom(x) end;
+
+    letLin xa = newRes("xxx")
+    letLin ya = ff(xa)
+    letLin ll = linCons(ya,null)
+    if-null ll
+    then freeList(ll)
+    else split ll as carx cdrx
+         copyAtom carx as xx1 xx2
+         copyList cdrx as yy1 yy2
+         letLin rt1 = linCons(xx1,yy1)
+         letLin rt2 = linCons(xx2,yy2)
+         begin
+            freeList(rt1);
+            freeList(rt2)
+         end;
+    letLin vv = newRes("vv")
+    123;
+    
+    letLin zz = newRes("zzz")
+    letLin zza = linCons(zz,null)
+    split zza as caa cbb
+    freeAtom(caa)
+end
+

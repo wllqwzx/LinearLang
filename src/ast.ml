@@ -26,7 +26,8 @@ type term =
     | Begin_term     of term list
     | LetUn_term     of string * term * term
     | LetLin_term    of string * term * term
-    | Letrec_term    of string * ty * term * term
+    (*| Letrec_term    of string * ty * term * term*)
+    | Fix_term       of term
     
     | NewLinRes_term    of string
     | CopyAtom_term     of term * string * string * term

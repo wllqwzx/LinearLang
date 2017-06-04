@@ -5,6 +5,7 @@ open Parser
 open Lexer
 open Ast
 open Util
+open TypeChecker
 
 exception RuntimeError of string
 (*
@@ -43,4 +44,5 @@ let () =
     let str = In_channel.input_all file in
     In_channel.close file;
     let ast = getAst str in
-    Util.print_ast ast
+    Util.print_ast ast;
+    Util.print_ty (TypeChecker.check ast)

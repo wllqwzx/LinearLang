@@ -122,11 +122,11 @@ let rec type_of =
     | If_term        (tm1,tm2,tm3) -> let typ = type_of tm1 in
                                       if typ = BoolTy
                                       then let tenvCopy = envCopy tenv in
-                                           let typ1 = type_of tm1 in
+                                           let typ1 = type_of tm2 in
                                            let temp = envCopy tenv in
                                            begin
                                                 tenv := !tenvCopy;
-                                                let typ2 = type_of tm2 in
+                                                let typ2 = type_of tm3 in
                                                 if typ1 = typ2 
                                                 then if envSame !temp !tenv
                                                      then typ1
@@ -175,20 +175,38 @@ let rec type_of =
                                       | LinListTy -> raise (TypeError ("LetUn can not bind a LinListTy term!"))
                                       | _ -> begin 
                                                 tenv := Extend_tenv (str,typ,!tenv);
-                                                type_of tm2
+                                                let typ0 = type_of tm2 in
+                                                begin 
+                                                    tenv := delete_var !tenv str;
+                                                    typ0
+                                                end
                                              end)
     | LetLin_term    (str,tm1,tm2) -> let typ = type_of tm1 in
                                       (match typ with
                                       | LinResTy -> begin
                                                         tenv := Extend_tenv (str,typ,!tenv);
-                                                        type_of tm2
+                                                        let typ0 = type_of tm2 in
+                                                        begin
+                                                            tenv := delete_var !tenv str;
+                                                            typ0
+                                                        end
                                                     end
                                       | LinListTy -> begin
                                                         tenv := Extend_tenv (str,typ,!tenv);
-                                                        type_of tm2
+                                                        let typ0 = type_of tm2 in
+                                                        begin
+                                                            tenv := delete_var !tenv str;
+                                                            typ0
+                                                        end
                                                      end
                                       | _ -> raise (TypeError ("LetLin can not bind a unrestricted term!")))
-    | Letrec_term    (str,typ,tm1,tm2) -> 
+    (*| Letrec_term    (str,typ,tm1,tm2) -> *)
+    | Fix_term          tm -> let typ = type_of tm in
+                              (match typ with
+                              | ArrowTy (ty1,ty2) -> if ty1 = ty2
+                                                     then ty1
+                                                     else raise (TypeError ("term in fix should have type: T -> T"))
+                              | _ -> raise (TypeError ("fix should receive a function!")))
     
 (*--------------------*)
     | NewLinRes_term    str -> LinResTy
@@ -196,21 +214,36 @@ let rec type_of =
                                                (match typ with
                                                | LinResTy -> begin
                                                                 tenv := (Extend_tenv (str1,typ,(Extend_tenv (str2,typ,!tenv))));
-                                                                type_of tm2
+                                                                let typ0 = type_of tm2 in
+                                                                begin
+                                                                    tenv := delete_var !tenv str1;
+                                                                    tenv := delete_var !tenv str2;
+                                                                    typ0
+                                                                end
                                                              end
                                                | _ -> raise (TypeError ("copyAtom only accept LinResTy!")))
     | CopyList_term     (tm1,str1,str2,tm2) -> let typ = type_of tm1 in
                                                (match typ with
                                                | LinListTy -> begin
                                                                 tenv := (Extend_tenv (str1,typ,(Extend_tenv (str2,typ,!tenv))));
-                                                                type_of tm2
+                                                                let typ0 = type_of tm2 in
+                                                                begin
+                                                                    tenv := delete_var !tenv str1;
+                                                                    tenv := delete_var !tenv str2;
+                                                                    typ0
+                                                                end
                                                               end
                                                | _ -> raise (TypeError ("copyList only accept LinListTy!")))
     | Split_term        (tm1,str1,str2,tm2) -> let typ = type_of tm1 in
                                                (match typ with
                                                | LinListTy -> begin
                                                                 tenv := (Extend_tenv (str1,LinResTy,(Extend_tenv (str2,LinListTy,!tenv))));
-                                                                type_of tm2
+                                                                let typ0 = type_of tm2 in
+                                                                begin
+                                                                    tenv := delete_var !tenv str1;
+                                                                    tenv := delete_var !tenv str2;
+                                                                    typ0
+                                                                end
                                                               end
                                                | _ -> raise (TypeError ("split only accept LinListTy!")))
     | FreeAtom_term     tm -> let typ = type_of tm in
@@ -236,13 +269,13 @@ and type_of_tmli =
     | tm::[] -> type_of tm
     | tm::tmli0 -> let typ = type_of tm in
                    if typ = UnitTy
-                   then
+                   then type_of_tmli tmli0
                    else raise (TypeError ("terms in begin should have UnitTy except the last one!"))
 
 
 let check =
     fun ast ->
     match ast with
-    | A_program tm -> type_of tm tenv
+    | A_program tm -> type_of tm
 
 
