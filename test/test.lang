@@ -24,7 +24,7 @@ letUn freeLislxxx = fun(x:LinList){
     else 
          begin 
             split x as x1 x2
-            freeAtom(x);
+            freeAtom(x1);
             freeList(x2)
          end
 }
