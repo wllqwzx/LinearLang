@@ -46,3 +46,5 @@ let () =
     let ast = getAst str in
     Util.print_ast ast;
     Util.print_ty (TypeChecker.check ast)
+
+    

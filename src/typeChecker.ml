@@ -27,7 +27,7 @@ let rec delete_var =
     | Empty_tenv -> Empty_tenv
     | Extend_tenv (str0,typ,env0) -> if (String.equal str str0) 
                                      then if isLinear(typ) 
-                                          then raise (TypeError ("Linear Variable " ^ str ^ " was unused!"))
+                                          then raise (TypeError ("Linear Variable " ^ str ^ " was unused!")) (* bug: when str was defined outside *)
                                           else env0
                                      else Extend_tenv (str0,typ,(delete_var env0 str))
 
@@ -261,6 +261,7 @@ let rec type_of =
                                      then LinListTy
                                      else raise (TypeError ("type of LinCons is LinResTy * LinListTy -> LinListTy!"))
     | Null_term         -> LinListTy)
+
 
 and type_of_tmli = 
     fun tmli ->
