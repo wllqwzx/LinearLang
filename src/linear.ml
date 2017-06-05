@@ -44,7 +44,9 @@ let () =
     let str = In_channel.input_all file in
     In_channel.close file;
     let ast = getAst str in
-    Util.print_ast ast;
-    Util.print_ty (TypeChecker.check ast)
-
+    try
+        Util.print_ast ast;
+        Util.print_ty (TypeChecker.check ast)
+    with TypeError str -> print_string ("!!!Type Error: " ^ str); print_newline ()
+    
     
