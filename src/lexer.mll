@@ -52,6 +52,7 @@ rule read =
     | ';'           { SEMICOLEN }
     | ':'           { COLEN }
     | '"'           { DOUBLEQUOTE }
+    | "->"          { ARROW }
     | "true"        { BOOLVAL true }
     | "false"       { BOOLVAL false }
     | "and"         { AND }
@@ -82,13 +83,13 @@ rule read =
     | "copyList"    { COPYLIST }
     | "freeAtom"    { FREEATOM }
     | "freeList"    { FREELIST }
+    | "appendList"  { APPENDLIST }
     | "print"       { PRINT }
     | "Number"      { NUMBER }
     | "Bool"        { BOOL }
     | "LinList"     { LINLIST }
     | "LinRes"      { LINRES }
     | "Unit"        { UNIT }
-    | "Arrow"       { ARROW }
     | id_rexp       { ID (Lexing.lexeme lexbuf) }    
     | _             { raise (LexerError ("!!!Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
                                           ^ " at " ^ (error_info lexbuf))) }

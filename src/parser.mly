@@ -31,6 +31,7 @@
 %token COPYLIST
 %token FREEATOM
 %token FREELIST
+%token APPENDLIST
 %token PRINT
 %token AND
 %token OR
@@ -99,7 +100,7 @@ nt_term:
                                     { Ast.If_null_term (ast1,ast2,ast3) }
     | FUN; L_PAREN; ast1 = ID; COLEN; typ = nt_ty; R_PAREN; L_CURLY; ast2 = nt_term; R_CURLY
                                     { Ast.Lambda_term (ast1,typ,ast2) }
-    | ast = ID; L_PAREN; ast1 = nt_term; R_PAREN
+    | ast = nt_term; L_PAREN; ast1 = nt_term; R_PAREN
                                     { Ast.App_term (ast,ast1) }
     | BEGIN; astlist = separated_list (SEMICOLEN, nt_term); END
                                     { Ast.Begin_term astlist }
@@ -110,6 +111,8 @@ nt_term:
                                     { Ast.CopyAtom_term (ast,ast1,ast2,ast3) }
     | COPYLIST; ast = nt_term; AS; ast1 = ID; ast2 = ID; ast3 = nt_term
                                     { Ast.CopyList_term (ast,ast1,ast2,ast3) }
+    | APPENDLIST; L_PAREN; ast1 = nt_term; COMMA; ast2 = nt_term; R_PAREN
+                                    { Ast.AppendList_term (ast1,ast2) }
     | FREEATOM; L_PAREN; ast=nt_term; R_PAREN
                                     { Ast.FreeAtom_term ast }
     | FREELIST; L_PAREN; ast=nt_term; R_PAREN
@@ -129,6 +132,6 @@ nt_ty:
     | LINRES    { Ast.LinResTy }
     | LINLIST   { Ast.LinListTy }
     | UNIT      { Ast.UnitTy }
-    | ARROW; L_PAREN; ty1 = nt_ty; COMMA; ty2 = nt_ty; R_PAREN
+    | L_PAREN; ty1 = nt_ty; ARROW; ty2 = nt_ty; R_PAREN
                 { Ast.ArrowTy (ty1,ty2) }
 

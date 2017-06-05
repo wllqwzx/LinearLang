@@ -1,6 +1,7 @@
 open Lexer
 open Parser
 open Ast
+open Util
 
 exception TypeError of string
 
@@ -161,13 +162,13 @@ let rec type_of =
                                             else raise (TypeError ("Can not use LinRes defined outside the function!")) 
                                         end
                                      end
-    | App_term       (str,tm) -> let typ = lookup_type !tenv str in
+    | App_term       (tm0,tm) -> let typ = type_of tm0 in
                                  (match typ with
                                   | ArrowTy (ty1,ty2) -> let typ2 = type_of tm in
                                                          if ty1 = typ2 
                                                          then ty2
-                                                         else raise (TypeError ("types of the parameter does not match the function: " ^ str))
-                                  | _ -> raise (TypeError (str ^ " should be a function!")))
+                                                         else begin Util.print_term tm0; raise (TypeError ("types of the parameter does not match the function")) end
+                                  | _ -> raise (TypeError ("left term of function application should have type: T1 -> T2!")))
     | Begin_term     tmli -> type_of_tmli tmli
     | LetUn_term     (str,tm1,tm2) -> let typ = type_of tm1 in
                                      (match typ with
@@ -254,6 +255,11 @@ let rec type_of =
                               if typ = LinListTy 
                               then UnitTy
                               else raise (TypeError ("type of freeList is LinListTy -> UnitTy"))
+    | AppendList_term   (tm1,tm2) -> let typ1 = type_of tm1 in
+                                     let typ2 = type_of tm2 in
+                                     if typ1 = LinListTy && typ2 = LinListTy
+                                     then LinListTy
+                                     else raise (TypeError ("type of appendList is LinListTy * LinListTy -> LinListTy"))
     | Print_term        tm -> type_of tm
     | LinCons_term      (tm1,tm2) -> let typ1 = type_of tm1 in
                                      let typ2 = type_of tm2 in

@@ -38,7 +38,7 @@ let rec print_term =
     | If_term       (tm1,tm2,tm3) -> print_string "if "; print_term tm1; print_string "\nthen "; print_term tm2; print_string "\nelse "; print_term tm3; print_newline ()
     | If_null_term  (str,tm1,tm2) -> print_string ("if-null " ^ str ^ "\nthen "); print_term tm1; print_string "\nelse "; print_term tm2; print_newline ()
     | Lambda_term   (str,typ,tm) -> print_string ("fun " ^ str ^ " : "); print_ty typ; print_string " {\n"; print_term tm; print_string "}\n"
-    | App_term      (str,tm) -> print_string (str ^ "("); print_term tm; print_string ")"
+    | App_term      (tm0,tm) -> print_term tm0; print_string "("; print_term tm; print_string ")"
     | Begin_term    tmli -> print_string "begin\n"; print_tmli tmli; print_string "end\n"
 
     | NewLinRes_term    str -> print_string ("newRes(" ^ str ^ ")")
@@ -46,6 +46,7 @@ let rec print_term =
     | CopyList_term     (tm,str1,str2,ast3) -> print_string "copyList "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ "\n"); print_term ast3
     | FreeAtom_term      tm -> print_string "freeAtom("; print_term tm; print_string ")\n"
     | FreeList_term      tm -> print_string "freeList("; print_term tm; print_string ")\n"
+    | AppendList_term   (tm1,tm2) -> print_string "appendList("; print_term tm1; print_string ", "; print_term tm2; print_string ")\n"
     | Print_term         tm -> print_string "print("; print_term tm; print_string ")\n"
     | LinCons_term      (tm1,tm2) -> print_string "LinCons("; print_term tm1; print_string ", "; print_term tm2; print_string ")\n"
     | Split_term        (tm,str1,str2,ast3) -> print_string "split "; print_term tm; print_string (" as " ^ str1 ^ " and " ^ str2 ^ "\n"); print_term ast3

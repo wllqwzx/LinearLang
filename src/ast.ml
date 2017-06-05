@@ -22,7 +22,7 @@ type term =
     | If_term        of term * term * term
     | If_null_term   of string * term * term
     | Lambda_term    of string * ty * term
-    | App_term       of string * term
+    | App_term       of term * term
     | Begin_term     of term list
     | LetUn_term     of string * term * term
     | LetLin_term    of string * term * term
@@ -32,6 +32,7 @@ type term =
     | NewLinRes_term    of string
     | CopyAtom_term     of term * string * string * term
     | CopyList_term     of term * string * string * term
+    | AppendList_term   of term * term
     | Split_term        of term * string * string * term
     | FreeAtom_term     of term
     | FreeList_term     of term
