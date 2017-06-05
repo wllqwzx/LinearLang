@@ -36,13 +36,49 @@ begin
         freeList(cbb)
     end;
 
-    letUn fact = fix fun (f:Arrow(Number,Number)){
+    letUn fact = fix fun (f:(Number -> Number)){
         fun (x:Number){
             if eq?(x,1) 
             then 1
             else mul(x,f(sub(x,1)))
         }
     }
-    fact(5)
+    freeList(null);
+
+    letUn reverse = fix fun (re:(LinList -> LinList)){
+        fun (list:LinList){
+            if-null list
+            then list
+            else split list as carx cdrx
+                 appendList(re(cdrx),linCons(carx,null))
+        }
+    }
+    freeList(null);
+
+    letUn findAt = fix fun(f:(Number -> (LinList -> LinRes))){
+        fun (index:Number){
+            fun (list:LinList){
+                if and(le?(0,index), not(eq?(1,index)))
+                then if-null list
+                     then begin freeList(list); newRes("false") end
+                     else split list as carx cdrx
+                          begin
+                             freeAtom(carx);
+                             f(sub(index,1))(cdrx)
+                          end
+                else if eq?(1,index)
+                     then split list as carx cdrx
+                          begin freeList(cdrx); carx end
+                     else begin freeList(list); newRes("false") end
+            }
+        }
+    }
+    letLin list = linCons(newRes("aaa"),null)
+    copyList list as l1 l2
+    letLin t = findAt(1)(l1)
+    begin
+        freeAtom(t);
+        freeList(l2)
+    end
 end
 
