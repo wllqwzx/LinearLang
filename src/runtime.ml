@@ -14,6 +14,7 @@ and value =
     | NumVal        of int          (* in stack *)
     | BoolVal       of bool         (* in stack *)
     | AddrVal       of int          (* in stack: reference of LinRes / LinList *)
+    | UnitVal                       (* in stack *)
     | ClosureVal    of string * Ast.term * stackData    (* in stack *)
     | LinResVal     of string       (* in heap *)
     | LinListVal    of int * int    (* in heap *)
@@ -39,6 +40,24 @@ let rec lookup_heap =
     | ExtendHeap (a,v,h0) -> if a = addr
                              then v
                              else lookup_heap h0 addr
+
+let rec delete_heap =
+    fun hp addr ->
+    match hp with
+    | EmptyHeap -> EmptyHeap
+    | ExtendHeap (a,v,h) -> if a = addr
+                            then h
+                            else ExtendHeap (a,v,(delete_heap h addr))
+
+let rec removeLinList =
+    fun hp addr ->
+    let hv = lookup_heap hp addr in
+    match hv with
+    | LinListVal (addr1,addr2) -> if addr1 = -1 && addr2 = -1
+                                  then delete_heap hp addr
+                                  else let hp2 = delete_heap hp addr1 in
+                                       removeLinList hp2 addr2
+    | _ -> raise (RuntimeError ("removeList only accept LinList!"))
 
 
 let rec value_of_tm =
@@ -107,24 +126,83 @@ let rec value_of_tm =
     | App_term       (tm1,tm2) -> let clo = value_of_tm tm1 stk in
                                   (match clo with
                                   | ClosureVal (str,tm,stk) -> let v = value_of_tm tm2 stk in
-                                                               (match v with
-                                                               | AddrVal addr ->
-                                                               | _ -> )
+                                                               value_of_tm tm (ExtendStack (str,v,stk))
                                   | _ -> raise (RuntimeError ("need a function!")))
     | Begin_term     tmlist -> 
-    | LetUn_term     (str,tm1,tm2) -> 
-    | LetLin_term    (str,tm1,tm2) -> 
+    | LetUn_term     (str,tm1,tm2) -> let v = value_of_tm tm1 stk in
+                                      value_of_tm tm2 (ExtendStack (str,v,stk))
+    | LetLin_term    (str,tm1,tm2) -> let v = value_of_tm tm1 stk in
+                                      value_of_tm tm2 (ExtendStack (str,v,stk))
     (*| Letrec_term    of string * ty * term * term*)
-    | Fix_term       tm -> 
-    
-    | NewLinRes_term    str -> 
-    | CopyAtom_term     (tm1,str1,str2,tm2) -> 
+    | Fix_term          tm -> 
+    | NewLinRes_term    str -> addressCount := !addressCount + 1;
+                               heap := ExtendHeap (!addressCount,(LinResVal str),!heap);
+                               AddrVal !addressCount
+    | CopyAtom_term     (tm1,str1,str2,tm2) ->  let v = value_of_tm tm1 stk in
+                                                (match v with
+                                                | AddrVal addr -> 
+                                                        let hv = lookup_heap !heap addr in
+                                                        (match hv with
+                                                        | LinResVal str -> 
+                                                                begin
+                                                                    addressCount := !addressCount + 1;
+                                                                    heap := ExtendHeap (!addressCount,LinResVal str,!heap);
+                                                                    value_of_tm tm2 (ExtendStack (str1,AddrVal addr,(ExtendStack (str2,AddrVal ! addressCount,stk))))
+                                                                end
+                                                        | _ -> raise (RuntimeError ("copyAtom only accept LinRes!")))
+                                                | _ -> raise (RuntimeError ("copyAtom only accept resources!")))
     | CopyList_term     (tm1,str1,str2,tm2) -> 
     | AppendList_term   (tm1,tm2) -> 
-    | Split_term        (tm1,str1,str2,tm2) -> 
-    | FreeAtom_term     tm -> 
-    | FreeList_term     tm ->
+    | Split_term        (tm1,str1,str2,tm2) -> let v = value_of_tm tm1 stk in
+                                               (match v with
+                                               | AddrVal addr -> 
+                                                    let hv = lookup_heap !heap addr in
+                                                    (match hv with
+                                                    | LinListVal (addr1,addr2) -> 
+                                                        if addr1 = -1 && addr2 = -1
+                                                        then begin 
+                                                                addressCount := !addressCount + 1;
+                                                                heap := ExtendHeap (!addressCount,(LinListVal (-1,-1)),!heap);
+                                                                value_of_tm tm2 (ExtendStack (str1,AddrVal addr,(ExtendStack (str2,AddrVal !addressCount,stk))))
+                                                             end
+                                                        else begin
+                                                                heap := delete_heap !heap addr;
+                                                                value_of_tm tm2 (ExtendStack (str1,AddrVal addr1,(ExtendStack (str2,AddrVal addr2,stk))))
+                                                             end
+                                                    | _ -> raise (RuntimeError ("split LinList only!")))
+                                               | _ -> raise (RuntimeError ("split resourcees only!")))
+    | FreeAtom_term     tm -> let v = value_of_tm tm stk in
+                              (match v with
+                              | AddrVal addr -> let hv = lookup_heap !heap addr in
+                                                (match hv with
+                                                | LinResVal str -> begin
+                                                                        heap := delete_heap !heap addr;
+                                                                        UnitVal
+                                                                   end
+                                                | _ -> raise (RuntimeError ("freeAtom only accept LinRes!")))
+                              | _ -> raise (RuntimeError ("freeAtom only accept resources!")))
+    | FreeList_term     tm -> let v = value_of_tm tm stk in
+                              (match v with
+                              | AddrVal addr -> begin
+                                                    heap := removeLinList !heap addr;
+                                                    UnitVal
+                                                end
+                              | _ -> raise (RuntimeError ("freeList only accept resources!")))
     | Print_term        tm -> 
-    | LinCons_term      (tm1,tm2) -> 
-    | Null_term         -> 
+    | LinCons_term      (tm1,tm2) -> let v1 = value_of_tm tm1 stk in
+                                     let v2 = value_of_tm tm2 stk in
+                                     (match v1,v2 with
+                                     | AddrVal n1, AddrVal n2 -> addressCount := !addressCount + 1;
+                                                                 heap := ExtendHeap (!addressCount,(LinListVal (n1,n2)),!heap);
+                                                                 AddrVal !addressCount
+                                     | _ -> raise (RuntimeError ("LinCons need a LinRes and a LinList!")))
+    | Null_term         ->  addressCount := !addressCount + 1;
+                            heap := ExtendHeap (!addressCount,(LinListVal (-1,-1)),!heap);
+                            AddrVal !addressCount
+
+let value_of_program =
+    fun ast ->
+    match ast with
+    | A_program tm -> value_of_tm tm stack
+
 
