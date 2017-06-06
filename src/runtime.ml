@@ -16,8 +16,21 @@ and value =
     | AddrVal       of int          (* in stack: reference of LinRes / LinList *)
     | UnitVal                       (* in stack *)
     | ClosureVal    of string * Ast.term * stackData    (* in stack *)
+    | FixVal        of string * Ast.term * stackData    (* in stack *)
     | LinResVal     of string       (* in heap *)
     | LinListVal    of int * int    (* in heap *)
+
+
+let print_val =
+    fun v ->
+    match v with
+    | NumVal        n -> print_string (string_of_int n)
+    | BoolVal       b -> print_string (string_of_bool b)
+    | AddrVal       addr -> print_string "reference"
+    | UnitVal       -> print_string "Unit"
+    | ClosureVal    (str,tm,stk) -> print_string "closure"
+    | FixVal        (str,tm,stk) -> print_string "fix point"
+    | _             -> print_string "print_val error!" 
 
 
 let addressCount = ref 0
@@ -97,6 +110,26 @@ let rec appendAddr =
     | _ -> raise (RuntimeError ("appendAddr error1"))
 
 
+let rec copyListTo =
+    fun addr newAddr ->
+    let hv = lookup_heap !heap addr in
+    match hv with
+    | LinListVal (left,right) -> if left = -1 && right = -1
+                                 then heap := ExtendHeap (newAddr,(LinListVal (-1,-1)),!heap)
+                                 else let lv = lookup_heap !heap left in
+                                      begin
+                                        addressCount := !addressCount + 2;
+                                        let newLeftAddr = !addressCount -1 in
+                                        let newRightAddr = !addressCount in
+                                        begin
+                                            heap := ExtendHeap (newAddr,(LinListVal (newLeftAddr,newRightAddr)),!heap);
+                                            heap := ExtendHeap (newLeftAddr,lv,!heap);
+                                            copyListTo right newRightAddr
+                                        end
+                                      end
+    | _ -> raise (RuntimeError ("copyListTo error!"))
+
+
 let rec value_of_tm =
     fun tm stk ->
     match tm with
@@ -162,8 +195,13 @@ let rec value_of_tm =
     | Lambda_term    (str,typ,tm) -> ClosureVal (str,tm,stk)
     | App_term       (tm1,tm2) -> let clo = value_of_tm tm1 stk in
                                   (match clo with
-                                  | ClosureVal (str,tm,stk) -> let v = value_of_tm tm2 stk in
-                                                               value_of_tm tm (ExtendStack (str,v,stk))
+                                  | ClosureVal (str,tm,stk0) -> let v = value_of_tm tm2 stk in
+                                                                value_of_tm tm (ExtendStack (str,v,stk0))
+                                  | FixVal (str,tm,stk0) -> let op = value_of_tm tm (ExtendStack (str,clo,stk0)) in
+                                                            let v = value_of_tm tm2 stk in
+                                                            (match op with
+                                                            | ClosureVal (str2,tm2,stk2) -> value_of_tm tm2 (ExtendStack (str2,v,stk2))
+                                                            | _ -> raise (RuntimeError ("FixVal error!")))
                                   | _ -> raise (RuntimeError ("need a function!")))
     | Begin_term     tmlist -> value_of_tmlist tmlist stk
     | LetUn_term     (str,tm1,tm2) -> let v = value_of_tm tm1 stk in
@@ -171,7 +209,10 @@ let rec value_of_tm =
     | LetLin_term    (str,tm1,tm2) -> let v = value_of_tm tm1 stk in
                                       value_of_tm tm2 (ExtendStack (str,v,stk))
     (*| Letrec_term    of string * ty * term * term*)
-    | Fix_term          tm -> 
+    | Fix_term          tm -> let v = value_of_tm tm stk in
+                              (match v with
+                              | ClosureVal (str,tm0,stk0) -> value_of_tm tm0 (ExtendStack (str,(FixVal (str,tm0,stk0)),stk0))
+                              | _ -> raise (RuntimeError ("fix operator accept lambda term!")))
     | NewLinRes_term    str -> addressCount := !addressCount + 1;
                                heap := ExtendHeap (!addressCount,(LinResVal str),!heap);
                                AddrVal !addressCount
@@ -188,7 +229,17 @@ let rec value_of_tm =
                                                                 end
                                                         | _ -> raise (RuntimeError ("copyAtom only accept LinRes!")))
                                                 | _ -> raise (RuntimeError ("copyAtom only accept resources!")))
-    | CopyList_term     (tm1,str1,str2,tm2) -> 
+    | CopyList_term     (tm1,str1,str2,tm2) -> let v = value_of_tm tm1 stk in
+                                               (match v with
+                                               | AddrVal addr -> begin
+                                                                    addressCount := !addressCount + 1;
+                                                                    let newAddr = !addressCount in
+                                                                    begin
+                                                                        copyListTo addr newAddr;
+                                                                        value_of_tm tm2 (ExtendStack (str1,AddrVal addr,(ExtendStack (str2,AddrVal newAddr,stk))))
+                                                                    end
+                                                                 end
+                                               | _ -> raise (RuntimeError ("copylist accept resources!")))
     | AppendList_term   (tm1,tm2) -> let v1 = value_of_tm tm1 stk in
                                      let v2 = value_of_tm tm2 stk in
                                      (match v1,v2 with

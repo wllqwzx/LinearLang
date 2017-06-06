@@ -73,12 +73,12 @@ begin
             }
         }
     }
-    letLin list = linCons(newRes("aaa"),null)
+    letLin list = linCons(newRes("aaa"),linCons(newRes("bbb"),null))
     copyList list as l1 l2
     letLin t = findAt(1)(l1)
     begin
-        freeAtom(t);
-        freeList(l2)
+        freeList(l2);
+        print(t)
     end
 end
 

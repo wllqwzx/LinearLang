@@ -1,55 +1,13 @@
 
-letUn fact = fix fun (f:Arrow(Number,Number)){
+letUn fact = fix fun (f:(Number -> Number)){
     fun (x:Number){
         if eq?(x,1) 
         then 1
-        else add(x,f(sub(x,1)))
+        else mul(x,f(sub(x,1)))
     }
 }
 
-letUn copyListxxx = fun(x:LinList){
-    if-null x
-    then null
-    else 
-        split x as carx cdrx
-        copyAtom carx as xx1 xx2
-        copyList cdrx as yy1 yy2
-        letLin rt1 = linCons(xx1,yy1)
-        letLin rt2 = linCons(xx2,yy2)
-        linCons(rt1,rt2)
-}
-
-
-letUn freeLislxxx = fun(x:LinList){
-    if-null x
-    then freeList(x)
-    else 
-         begin 
-            split x as x1 x2
-            freeAtom(x1);
-            freeList(x2)
-         end
-}
-
-letUn x = 10
-letUn y = 20
-
-letLin res1 = newRes("aaa")
-letLin res2 = newRes("bbb")
-
-letLin res2 = linCons(res1, res2)
-
-copyList res2 as a1 a2li
-split a2li as a2 anil
-letLin t1 = print(a1)
-letLin t2 = print(a2)
-
-begin
-    freeList(t1);
-    freeList(t2);
-    freeList(anil)
-end
-
+fact(5)
 
 
 
