@@ -1,0 +1,36 @@
+
+letUn reverse = fix fun (re:(LinList -> LinList)){
+    fun (list:LinList){
+        if-null list
+        then list
+        else split list as carx cdrx
+             appendList(re(cdrx),linCons(carx,null))
+    }
+}
+
+letUn findAt = fix fun(f:(Number -> (LinList -> LinRes))){
+    fun (index:Number){
+        fun (list:LinList){
+            if and(le?(0,index), not(eq?(1,index)))
+            then if-null list
+                    then begin freeList(list); newRes("false") end
+                    else split list as carx cdrx
+                         begin
+                            freeAtom(carx);
+                            f(sub(index,1))(cdrx)
+                         end
+            else if eq?(1,index)
+                    then split list as carx cdrx
+                         begin freeList(cdrx); carx end
+                    else begin freeList(list); newRes("false") end
+        }
+    }
+}
+
+letLin list = linCons(newRes("aaa"),linCons(newRes("bbb"),linCons(newRes("ccc"),null)))
+letLin list2 = print(list)
+letLin list3 = reverse(list2)
+letLin list4 = print(list3)
+letLin t = findAt(1)(list4)
+freeAtom(print(t))
+

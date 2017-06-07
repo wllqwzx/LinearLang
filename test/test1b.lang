@@ -1,0 +1,25 @@
+
+letUn factorial = fix fun (f:(Number -> Number)){
+    fun (x:Number){
+        if eq?(x,1) 
+        then 1
+        else mul(x,f(sub(x,1)))
+    }
+}
+
+begin
+    letLin x = newRes("aaa")
+    letLin y = newRes("bbb")
+    letLin z = linCons(x,linCons(y,null))
+    letLin t = print(z)
+
+    split t as t1 t2
+    begin
+        freeAtom(print(t1));
+        freeList(t2)
+    end;
+
+    letUn a1 = 6
+    letUn a2 = 5
+    factorial(a2)
+end

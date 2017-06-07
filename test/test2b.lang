@@ -1,0 +1,7 @@
+
+
+letLin x = newRes("aaa")
+copyAtom x as x1 x2
+letLin li = linCons(x1,linCons(x2,null))
+letLin li2 = print(li)
+freeList(li2)

@@ -6,7 +6,7 @@ open Lexer
 open Ast
 open Util
 open TypeChecker
-open Runtime
+open Eval
 
 exception RuntimeError of string
 
@@ -39,10 +39,9 @@ let () =
         let typ  = (TypeChecker.check ast) in
         print_string "type: "; Util.print_ty typ;
         print_string "\n\nevaluation----------------------------------\n";
-        let v = (Runtime.value_of_program ast) in
-        print_string "\nresult: "; Runtime.print_val v;
+        let v = (Eval.value_of_program ast) in
+        print_string "\nresult: "; Eval.print_val v;
         print_newline ();
     with  TypeError str -> print_string ("!!!Type Error: " ^ str); print_newline ()
         | RuntimeError str -> print_string ("!!!Runtime Error: " ^ str); print_newline ()
-    
     

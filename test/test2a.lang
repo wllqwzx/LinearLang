@@ -1,0 +1,5 @@
+
+letLin x = newRes("aaa")
+letLin li = linCons(x,linCons(x,null))
+letLin li2 = print(li)
+freeList(li2)
