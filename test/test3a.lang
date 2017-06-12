@@ -3,7 +3,7 @@ letLin y = newRes("bbb")
 
 if eq?(2,3)
 then 
-    begin freeAtom(x); freeAtom(x) end
+    begin freeAtom(x); freeAtom(y) end
 else 
     begin freeAtom(y) end
 

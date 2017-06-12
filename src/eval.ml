@@ -268,8 +268,8 @@ let rec value_of_tm =
                                                         if addr1 = -1 && addr2 = -1
                                                         then begin 
                                                                 addressCount := !addressCount + 1;
-                                                                heap := ExtendHeap (!addressCount,(LinListVal (-1,-1)),!heap);
-                                                                value_of_tm tm2 (ExtendStack (str1,AddrVal addr,(ExtendStack (str2,AddrVal !addressCount,stk))))
+                                                                heap := ExtendHeap (!addressCount,(LinResVal "fault"),!heap);
+                                                                value_of_tm tm2 (ExtendStack (str1,AddrVal !addressCount,(ExtendStack (str2,AddrVal addr,stk))))
                                                              end
                                                         else begin
                                                                 heap := delete_heap !heap addr;
